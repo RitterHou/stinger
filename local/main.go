@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/ritterhou/stinger/local/mylog"
-	"github.com/ritterhou/stinger/local/network"
+	"github.com/ritterhou/stinger/common/mylog"
+	"github.com/ritterhou/stinger/common/network"
 	"net"
 	"strconv"
 )

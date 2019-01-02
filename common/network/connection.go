@@ -1,7 +1,7 @@
 package network
 
 import (
-	"github.com/ritterhou/stinger/local/mylog"
+	"github.com/ritterhou/stinger/common/mylog"
 	"net"
 )
 
