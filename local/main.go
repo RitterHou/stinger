@@ -3,19 +3,15 @@ package main
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/ritterhou/stinger/network"
-	"log"
+	"github.com/ritterhou/stinger/local/mylog"
+	"github.com/ritterhou/stinger/local/network"
 	"net"
-	"os"
 	"strconv"
 )
 
-func init() {
-	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
-	log.SetOutput(os.Stdout)
-}
-
 const localPort = 2680
+
+var log = mylog.Info
 
 func main() {
 	var l net.Listener
@@ -43,12 +39,13 @@ func main() {
 }
 
 func handlerSocks5(conn network.Connection) {
-	//defer conn.Close()
-
 	authSocks5(conn)
 	remoteConn := connectSocks5(conn)
-	handlerSocks5Data(conn, remoteConn)
 
+	log.Printf("Connect success %s -> %s, %s => %s\n",
+		conn.RemoteAddress(), conn.LocalAddress(),
+		remoteConn.LocalAddress(), remoteConn.RemoteAddress())
+	handlerSocks5Data(conn, remoteConn)
 }
 
 func authSocks5(conn network.Connection) {
@@ -64,8 +61,6 @@ func authSocks5(conn network.Connection) {
 	}
 
 	conn.Write([]byte{5, 0})
-
-	//log.Println("Auth success ", conn.RemoteAddress())
 }
 
 func connectSocks5(conn network.Connection) network.Connection {
@@ -107,11 +102,6 @@ func connectSocks5(conn network.Connection) network.Connection {
 	conn.Write([]byte{5, 0, 0, 1, 0, 0, 0, 0, 0, 0})
 
 	remoteConn := network.Connection{Conn: c}
-
-	log.Printf("Connect success %s -> %s, %s => %s\n",
-		conn.RemoteAddress(), conn.LocalAddress(),
-		remoteConn.LocalAddress(), remoteConn.RemoteAddress())
-
 	return remoteConn
 }
 
@@ -119,7 +109,10 @@ func handlerSocks5Data(localConn network.Connection, remoteConn network.Connecti
 	go func() {
 		for {
 			buf := localConn.Read(1024)
-			//log.Println(string(buf))
+			if buf == nil {
+				remoteConn.Close()
+				break
+			}
 			remoteConn.Write(buf)
 		}
 	}()
@@ -127,7 +120,10 @@ func handlerSocks5Data(localConn network.Connection, remoteConn network.Connecti
 	go func() {
 		for {
 			buf := remoteConn.Read(1024)
-			//log.Println(string(buf))
+			if buf == nil {
+				localConn.Close()
+				break
+			}
 			localConn.Write(buf)
 		}
 	}()

@@ -1,9 +1,11 @@
 package network
 
 import (
-	"log"
+	"github.com/ritterhou/stinger/local/mylog"
 	"net"
 )
+
+var log = mylog.Info
 
 type Connection struct {
 	Conn net.Conn
@@ -14,12 +16,13 @@ func (c Connection) Read(length uint32) []byte {
 
 	var buf = make([]byte, length)
 	var bufSize, err = conn.Read(buf)
-	//if bufSize == 0 {
-	//	log.Printf("Connection closed by client %s", conn.RemoteAddr())
-	//	return nil
-	//}
+	if bufSize == 0 {
+		log.Printf("Connection closed by client %s", conn.RemoteAddr())
+		return nil
+	}
 	if err != nil {
 		log.Println(err)
+		c.Close()
 		return nil
 	}
 	return buf[:bufSize]
