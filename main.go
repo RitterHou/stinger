@@ -3,17 +3,24 @@ package main
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/ritterhou/stinger/common/mylog"
 	"github.com/ritterhou/stinger/common/network"
+	"github.com/ritterhou/stinger/common/pac"
+	"log"
 	"net"
+	"os"
 	"strconv"
 )
 
 const localPort = 2680
 
-var log = mylog.Info
+func init() {
+	log.SetOutput(os.Stdout)
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+}
 
 func main() {
+	go pac.Start()
+
 	var l net.Listener
 	var err error
 	var host = "0.0.0.0:" + strconv.Itoa(localPort)
@@ -42,9 +49,7 @@ func handlerSocks5(conn network.Connection) {
 	authSocks5(conn)
 	remoteConn := connectSocks5(conn)
 
-	log.Printf("Connect success %s -> %s, %s => %s\n",
-		conn.RemoteAddress(), conn.LocalAddress(),
-		remoteConn.LocalAddress(), remoteConn.RemoteAddress())
+	//log.Printf("Connect success %s -> %s, %s => %s\n", conn.RemoteAddress(), conn.LocalAddress(), remoteConn.LocalAddress(), remoteConn.RemoteAddress())
 	handlerSocks5Data(conn, remoteConn)
 }
 
