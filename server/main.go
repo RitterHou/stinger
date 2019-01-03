@@ -76,6 +76,7 @@ func handlerClient(localConn network.Connection) {
 				localConn.Close()
 				break
 			}
+			buf = codec.Encrypt(buf)
 			// server -> local
 			localConn.WriteWithLength(buf)
 		}

@@ -4,12 +4,15 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/ritterhou/stinger/core/codec"
+	"github.com/ritterhou/stinger/core/common"
 	"github.com/ritterhou/stinger/core/network"
 	"github.com/ritterhou/stinger/local/pac"
 	"log"
 	"net"
 	"os"
 	"strconv"
+	"sync/atomic"
+	"time"
 )
 
 const localPort = 2680
@@ -19,8 +22,32 @@ func init() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 }
 
+var totalDownload uint64
+var totalUpload uint64
+
+// 显示带宽以及流量
+func BandwidthTraffic() {
+	ticker := time.NewTicker(1 * time.Second)
+	lastDownload := totalDownload
+	lastUpload := totalUpload
+	for range ticker.C {
+		t := time.Now()
+		now := t.Format("2006-01-02 15:04:05")
+
+		download := totalDownload - lastDownload
+		upload := totalUpload - lastUpload
+		if upload != 0 && download != 0 {
+			fmt.Printf("%s %s ↓ %s ↑", now, common.ByteFormat(download), common.ByteFormat(upload))
+			fmt.Printf("    (%s ↓ %s ↑)\n", common.ByteFormat(totalDownload), common.ByteFormat(totalUpload))
+		}
+		lastDownload = totalDownload
+		lastUpload = totalUpload
+	}
+}
+
 func main() {
 	go pac.Start("local/pac/pac.js", 2600)
+	go BandwidthTraffic()
 
 	var l net.Listener
 	var err error
@@ -124,8 +151,11 @@ func handlerSocks5Data(localConn network.Connection, remoteConn network.Connecti
 				remoteConn.Close()
 				break
 			}
-			// local -> server
+
 			buf = codec.Encrypt(buf)
+			// 记载本地上传的流量
+			atomic.AddUint64(&totalUpload, uint64(len(buf)))
+			// local -> server
 			remoteConn.WriteWithLength(buf)
 		}
 	}()
@@ -138,6 +168,10 @@ func handlerSocks5Data(localConn network.Connection, remoteConn network.Connecti
 				localConn.Close()
 				break
 			}
+			// 记载本地下载的流量
+			atomic.AddUint64(&totalDownload, uint64(len(buf)))
+
+			buf = codec.Decrypt(buf)
 			// local -> 浏览器
 			localConn.Write(buf)
 		}
