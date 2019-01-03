@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/ritterhou/stinger/common/network"
-	"github.com/ritterhou/stinger/common/pac"
+	"github.com/ritterhou/stinger/core/network"
+	"github.com/ritterhou/stinger/local/pac"
 	"log"
 	"net"
 	"os"
@@ -19,7 +19,7 @@ func init() {
 }
 
 func main() {
-	go pac.Start()
+	go pac.Start("local/pac/pac.js", 2600)
 
 	var l net.Listener
 	var err error
@@ -96,18 +96,22 @@ func connectSocks5(conn network.Connection) network.Connection {
 	}
 
 	port := binary.BigEndian.Uint16(conn.Read(2))
+	targetAddr := host + ":" + strconv.Itoa(int(port))
 
-	addr := host + ":" + strconv.Itoa(int(port))
-
-	c, err := net.Dial("tcp", addr)
+	server := "127.0.0.1:26800"
+	c, err := net.Dial("tcp", server)
 	if err != nil {
-		log.Fatal("Can't connect to", addr)
+		log.Fatal("Can't connect to", server)
 	}
+
+	// 首先发送到远程服务器的链接请求
+	targetAddrBytes := []byte(targetAddr)
+	c.Write([]byte{byte(len(targetAddrBytes))})
+	c.Write(targetAddrBytes)
 
 	conn.Write([]byte{5, 0, 0, 1, 0, 0, 0, 0, 0, 0})
 
-	remoteConn := network.Connection{Conn: c}
-	return remoteConn
+	return network.Connection{Conn: c}
 }
 
 func handlerSocks5Data(localConn network.Connection, remoteConn network.Connection) {

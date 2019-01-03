@@ -8,12 +8,8 @@ import (
 	"strconv"
 )
 
-const (
-	fileName = "common/pac/pac.js"
-	pacPort  = 2600
-)
-
-func Start() {
+// 启动PAC文件的HTTP服务器
+func Start(fileName string, pacPort int) {
 	data, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		log.Fatal(err)
