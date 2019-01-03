@@ -13,4 +13,4 @@
 
 /.idea
 *.log
-stinger**
+/target
