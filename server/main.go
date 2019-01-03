@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/ritterhou/stinger/core/codec"
 	"github.com/ritterhou/stinger/core/network"
 	"log"
 	"net"
@@ -44,7 +45,7 @@ func handlerClient(localConn network.Connection) {
 	targetAddrLength := localConn.Read(1)[0]
 	targetAddrBytes := localConn.Read(uint32(targetAddrLength))
 	targetAddr := string(targetAddrBytes)
-	log.Println(targetAddr)
+	//log.Println(targetAddr)
 
 	c, err := net.Dial("tcp", targetAddr)
 	if err != nil {
@@ -55,23 +56,28 @@ func handlerClient(localConn network.Connection) {
 
 	go func() {
 		for {
-			buf := localConn.Read(1024)
+			// local -> server
+			buf := localConn.ReadWithLength()
 			if buf == nil {
 				remoteConn.Close()
 				break
 			}
+			buf = codec.Decrypt(buf)
+			// server -> remote
 			remoteConn.Write(buf)
 		}
 	}()
 
 	go func() {
 		for {
+			// remote -> server
 			buf := remoteConn.Read(1024)
 			if buf == nil {
 				localConn.Close()
 				break
 			}
-			localConn.Write(buf)
+			// server -> local
+			localConn.WriteWithLength(buf)
 		}
 	}()
 }

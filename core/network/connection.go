@@ -1,6 +1,7 @@
 package network
 
 import (
+	"encoding/binary"
 	"log"
 	"net"
 )
@@ -31,6 +32,25 @@ func (c Connection) Write(data []byte) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func (c Connection) ReadWithLength() []byte {
+	lengthBuf := c.Read(4)
+	if len(lengthBuf) == 0 {
+		// 链接断开
+		return nil
+	}
+	//log.Println(lengthBuf)
+	length := binary.BigEndian.Uint32(lengthBuf)
+	return c.Read(length)
+}
+
+func (c Connection) WriteWithLength(source []byte) {
+	length := uint32(len(source))
+	lengthBuf := make([]byte, 4)
+	binary.BigEndian.PutUint32(lengthBuf, length)
+	c.Write(lengthBuf)
+	c.Write(source)
 }
 
 func (c Connection) Close() {

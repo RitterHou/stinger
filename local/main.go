@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/binary"
 	"fmt"
+	"github.com/ritterhou/stinger/core/codec"
 	"github.com/ritterhou/stinger/core/network"
 	"github.com/ritterhou/stinger/local/pac"
 	"log"
@@ -117,22 +118,27 @@ func connectSocks5(conn network.Connection) network.Connection {
 func handlerSocks5Data(localConn network.Connection, remoteConn network.Connection) {
 	go func() {
 		for {
+			// 浏览器 -> local
 			buf := localConn.Read(1024)
 			if buf == nil {
 				remoteConn.Close()
 				break
 			}
-			remoteConn.Write(buf)
+			// local -> server
+			buf = codec.Encrypt(buf)
+			remoteConn.WriteWithLength(buf)
 		}
 	}()
 
 	go func() {
 		for {
-			buf := remoteConn.Read(1024)
+			// server -> local
+			buf := remoteConn.ReadWithLength()
 			if buf == nil {
 				localConn.Close()
 				break
 			}
+			// local -> 浏览器
 			localConn.Write(buf)
 		}
 	}()
