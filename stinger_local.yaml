@@ -1,10 +1,10 @@
 # PAC(Proxy auto-config)的相关设置
 pac:
-  # PAC的端口设置，使用http://host:port来自动配置代理域名
+  # PAC的端口设置，使用 http://host:port/pac 来自动配置代理域名
   port: 2600
-  # 是否开始全局代理
+  # 是否开启全局代理
   global: true
-  # 需要使用代理的域名，域名使用后缀匹配
+  # 需要使用代理的域名，域名使用包含匹配
   domains: [
     hourui.me,
     nosuchfield.com,

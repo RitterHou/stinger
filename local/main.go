@@ -67,7 +67,11 @@ func startProxyServer(proxyPort int) {
 }
 
 func handlerSocks5(conn network.Connection) {
-	socks.AuthSocks5(conn)
+	err := socks.AuthSocks5(conn)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 	remoteConn, err := socks.ConnectRemote(conn, remoteServer)
 	if err != nil {
 		log.Println(err)

@@ -42,7 +42,11 @@ func main() {
 }
 
 func handlerClient(localConn network.Connection) {
-	targetAddrBytes := localConn.ReadWithLength()
+	targetAddrBytes, err := localConn.ReadWithLength()
+	if err != nil {
+		log.Println(err)
+		return
+	}
 	targetAddr := string(targetAddrBytes)
 	//log.Println(targetAddr)
 
@@ -59,8 +63,9 @@ func handlerClient(localConn network.Connection) {
 	go func() {
 		for {
 			// local -> server
-			buf := localConn.ReadWithLength()
-			if buf == nil {
+			buf, err := localConn.ReadWithLength()
+			if err != nil {
+				log.Println(localConn.RemoteAddress() + " -> " + err.Error())
 				remoteConn.Close()
 				break
 			}
@@ -73,8 +78,9 @@ func handlerClient(localConn network.Connection) {
 	go func() {
 		for {
 			// remote -> server
-			buf := remoteConn.Read(1024)
-			if buf == nil {
+			buf, err := remoteConn.Read(1024)
+			if err != nil {
+				log.Println(remoteConn.RemoteAddress() + " -> " + err.Error())
 				localConn.Close()
 				break
 			}

@@ -2,6 +2,7 @@ package network
 
 import (
 	"encoding/binary"
+	"errors"
 	"log"
 	"net"
 )
@@ -10,21 +11,16 @@ type Connection struct {
 	Conn net.Conn
 }
 
-func (c Connection) Read(length uint32) []byte {
+func (c Connection) Read(length uint32) ([]byte, error) {
 	conn := c.Conn
 
 	var buf = make([]byte, length)
 	var bufSize, err = conn.Read(buf)
-	if bufSize == 0 {
-		//log.Printf("Connection closed by client %s", conn.RemoteAddr())
-		return nil
-	}
 	if err != nil {
-		log.Println(err)
 		c.Close()
-		return nil
+		return nil, err
 	}
-	return buf[:bufSize]
+	return buf[:bufSize], nil
 }
 
 func (c Connection) Write(data []byte) {
@@ -34,15 +30,29 @@ func (c Connection) Write(data []byte) {
 	}
 }
 
-func (c Connection) ReadWithLength() []byte {
-	lengthBuf := c.Read(4)
-	if len(lengthBuf) == 0 {
-		// 链接断开
-		return nil
+func (c Connection) ReadWithLength() ([]byte, error) {
+	lengthBuf, err := c.Read(4)
+	if err != nil {
+		return nil, err
 	}
-	//log.Println(lengthBuf)
 	length := binary.BigEndian.Uint32(lengthBuf)
-	return c.Read(length)
+	buf, err := c.Read(length)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+// 读取一个单独的字节
+func (c Connection) ReadByte() (byte, error) {
+	buf, err := c.Read(1)
+	if err != nil {
+		return 0, err
+	}
+	if len(buf) == 0 {
+		return 0, errors.New("read buf size is 0")
+	}
+	return buf[0], nil
 }
 
 func (c Connection) WriteWithLength(source []byte) {
