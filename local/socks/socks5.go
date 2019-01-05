@@ -60,6 +60,7 @@ func ConnectRemote(conn network.Connection, remoteServer string) network.Connect
 	}
 
 	command := conn.Read(1)[0]
+	// 仅支持通过TCP协议进行流量转发
 	if command != 1 {
 		log.Fatal("Only support [CONNECT] command")
 	}
@@ -83,20 +84,15 @@ func ConnectRemote(conn network.Connection, remoteServer string) network.Connect
 	port := binary.BigEndian.Uint16(conn.Read(2))
 	targetAddr := host + ":" + strconv.Itoa(int(port))
 
-	serverConn, err := net.Dial("tcp", remoteServer)
+	c, err := net.Dial("tcp", remoteServer)
 	if err != nil {
 		log.Fatal("Can't connect to", remoteServer)
 	}
-
-	//log.Printf(targetAddr)
-	// 首先发送到远程服务器的链接请求
-	targetAddrBytes := []byte(targetAddr)
-	serverConn.Write([]byte{byte(len(targetAddrBytes))})
-	serverConn.Write(targetAddrBytes)
+	serverConn := network.Connection{Conn: c}
+	serverConn.WriteWithLength([]byte(targetAddr))
 
 	conn.Write([]byte{5, 0, 0, 1, 0, 0, 0, 0, 0, 0})
-
-	return network.Connection{Conn: serverConn}
+	return serverConn
 }
 
 func HandlerSocks5Data(localConn network.Connection, remoteConn network.Connection) {

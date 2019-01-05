@@ -42,8 +42,7 @@ func main() {
 }
 
 func handlerClient(localConn network.Connection) {
-	targetAddrLength := localConn.Read(1)[0]
-	targetAddrBytes := localConn.Read(uint32(targetAddrLength))
+	targetAddrBytes := localConn.ReadWithLength()
 	targetAddr := string(targetAddrBytes)
 	//log.Println(targetAddr)
 
