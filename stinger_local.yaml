@@ -1,0 +1,14 @@
+# PAC(Proxy auto-config)的相关设置
+pac:
+  # PAC的端口设置，使用http://host:port来自动配置代理域名
+  port: 2600
+  # 需要使用代理的域名，域名使用后缀匹配
+  domains: [
+    hourui.me,
+    nosuchfield.com
+  ]
+
+# 本地socks5代理所监听的端口
+local_port: 2680
+# 服务器的地址
+server_address: 127.0.0.1:26800
