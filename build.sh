@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# 分别为Windows、Mac和Linux编译local和server应用
 build () {
     windows_name="stinger_$1_windows.exe"
     echo "Building $windows_name"
@@ -17,18 +18,20 @@ build () {
     mv ${mac_name} ../target
 }
 
+# 开始执行
+start=`date +%s`
+# 删除原有的目标文件
 directoryName="target"
-
 rm -rf ${directoryName}
-
 if [ ! -d ${directoryName} ]; then
-    echo "Creating directory $directoryName"
+    echo "Creating directory \"$directoryName\""
     mkdir ${directoryName}
 fi
 
 # 移动配置文件
-mkdir -p target/local/pac
-cp local/pac/pac.js target/local/pac/pac.js
+echo "Copying configuration files"
+cp ./stinger_local.yaml ./target
+cp ./stinger_server.yaml ./target
 
 # 编译源代码
 cd ./server
@@ -36,3 +39,7 @@ build "server"
 
 cd ../local
 build "local"
+
+end=`date +%s`
+cost=$[$end-$start]
+echo "Build success, cost ${cost} second(s)"
