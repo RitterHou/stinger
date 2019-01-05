@@ -48,9 +48,12 @@ func handlerClient(localConn network.Connection) {
 
 	c, err := net.Dial("tcp", targetAddr)
 	if err != nil {
-		log.Fatal("Can't connect to", targetAddr)
+		log.Println("can't connect to target address", targetAddr)
+		localConn.Write([]byte{1}) // 远程主机连接失败
+		return
 	}
 
+	localConn.Write([]byte{0}) // 连接成功
 	remoteConn := network.Connection{Conn: c}
 
 	go func() {

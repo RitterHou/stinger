@@ -30,12 +30,13 @@ func main() {
 
 	pac := conf["pac"].(map[interface{}]interface{})
 	pacPort := pac["port"].(int)
+	global := pac["global"].(bool)
 	domains := pac["domains"].([]interface{})
 
 	localPort := conf["local_port"].(int)
 	remoteServer = conf["server_address"].(string)
 
-	http.CreatePacFile(localPort, domains)
+	http.CreatePacFile(localPort, global, domains)
 	go http.StartServer(pacPort)
 
 	go socks.BandwidthTraffic()
@@ -67,7 +68,11 @@ func startProxyServer(proxyPort int) {
 
 func handlerSocks5(conn network.Connection) {
 	socks.AuthSocks5(conn)
-	remoteConn := socks.ConnectRemote(conn, remoteServer)
+	remoteConn, err := socks.ConnectRemote(conn, remoteServer)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
 	//log.Printf("Connect success %s -> %s, %s => %s\n", conn.RemoteAddress(), conn.LocalAddress(), remoteConn.LocalAddress(), remoteConn.RemoteAddress())
 	socks.HandlerSocks5Data(conn, remoteConn)

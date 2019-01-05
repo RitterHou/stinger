@@ -2,10 +2,13 @@
 pac:
   # PAC的端口设置，使用http://host:port来自动配置代理域名
   port: 2600
+  # 是否开始全局代理
+  global: true
   # 需要使用代理的域名，域名使用后缀匹配
   domains: [
     hourui.me,
-    nosuchfield.com
+    nosuchfield.com,
+    quora.com
   ]
 
 # 本地socks5代理所监听的端口

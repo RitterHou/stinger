@@ -3,6 +3,7 @@ package socks
 import (
 	"encoding/binary"
 	"fmt"
+	"github.com/pkg/errors"
 	"github.com/ritterhou/stinger/core/codec"
 	"github.com/ritterhou/stinger/core/common"
 	"github.com/ritterhou/stinger/core/network"
@@ -53,7 +54,7 @@ func AuthSocks5(conn network.Connection) {
 	conn.Write([]byte{5, 0})
 }
 
-func ConnectRemote(conn network.Connection, remoteServer string) network.Connection {
+func ConnectRemote(conn network.Connection, remoteServer string) (network.Connection, error) {
 	socksVersion := conn.Read(1)[0]
 	if socksVersion != 5 {
 		log.Fatal("Socks version should be 5, now is", socksVersion)
@@ -82,17 +83,27 @@ func ConnectRemote(conn network.Connection, remoteServer string) network.Connect
 	}
 
 	port := binary.BigEndian.Uint16(conn.Read(2))
+	// 构建最终目标的地址
 	targetAddr := host + ":" + strconv.Itoa(int(port))
-
+	// 尝试连接到远程主机
 	c, err := net.Dial("tcp", remoteServer)
 	if err != nil {
-		log.Fatal("Can't connect to", remoteServer)
+		conn.Write([]byte{5, 3, 0, 1, 0, 0, 0, 0, 0, 0})
+		return network.Connection{}, errors.New("can't connect to remote server " + remoteServer)
 	}
 	serverConn := network.Connection{Conn: c}
+	// 把最终目标的地址（域名或IP）发送到远程主机，由远程主机负责实现连接
 	serverConn.WriteWithLength([]byte(targetAddr))
-
+	// 获取远程主机的连接状态
+	connectStatus := serverConn.Read(1)[0]
+	if connectStatus != 0 {
+		serverConn.Close()
+		conn.Write([]byte{5, 4, 0, 1, 0, 0, 0, 0, 0, 0})
+		return network.Connection{}, errors.New("remote server connect target address failed " + targetAddr)
+	}
+	// 向客户端发送连接成功的消息
 	conn.Write([]byte{5, 0, 0, 1, 0, 0, 0, 0, 0, 0})
-	return serverConn
+	return serverConn, nil
 }
 
 func HandlerSocks5Data(localConn network.Connection, remoteConn network.Connection) {
