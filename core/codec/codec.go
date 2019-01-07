@@ -21,7 +21,6 @@ func SetKey(k string) {
 		k = k[:32]
 	}
 	key = []byte(k)
-	log.Println(len(key))
 }
 
 func Encrypt(source []byte) []byte {

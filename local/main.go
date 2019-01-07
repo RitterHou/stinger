@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/ritterhou/stinger/core/codec"
 	"github.com/ritterhou/stinger/core/network"
 	localConf "github.com/ritterhou/stinger/local/conf"
@@ -11,6 +12,7 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"time"
 )
 
 var (
@@ -20,7 +22,15 @@ var (
 )
 
 func init() {
-	log.SetOutput(os.Stdout)
+	t := time.Now()
+	now := t.Format("20060102150405")
+	filename := fmt.Sprintf("stinger_local.%s.log", now)
+
+	logFile, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		log.Fatalln("open log file failed", err)
+	}
+	log.SetOutput(logFile)
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 }
 
