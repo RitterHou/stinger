@@ -8,7 +8,21 @@ import (
 	"log"
 )
 
-var key = []byte("2333333333333333")
+const key32Bytes = "23333333333333333333333333333333"
+
+var key = []byte(key32Bytes)
+
+// 更新key的值
+func SetKey(k string) {
+	kLen := len(k)
+	if kLen < 32 {
+		k += key32Bytes[:32-kLen]
+	} else if kLen > 32 {
+		k = k[:32]
+	}
+	key = []byte(k)
+	log.Println(len(key))
+}
 
 func Encrypt(source []byte) []byte {
 	block, err := aes.NewCipher(key)

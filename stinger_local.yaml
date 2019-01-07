@@ -16,4 +16,4 @@ local_port: 2680
 # 服务器的地址
 server_address: 127.0.0.1:26800
 # 密码
-password: 123456
+password: 123456a

@@ -40,6 +40,8 @@ func main() {
 		log.Println("Unknown type ", v)
 	}
 
+	codec.SetKey(password)
+
 	startProxyServer(serverPort)
 }
 
@@ -80,7 +82,7 @@ func handlerClient(localConn network.Connection) {
 		localConn.Write([]byte{1})
 		return
 	}
-	localConn.Write([]byte{0})
+	localConn.Write([]byte{0}) // 验证成功
 
 	targetAddrBytes, err := localConn.ReadWithLength()
 	if err != nil {

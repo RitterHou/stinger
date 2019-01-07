@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"github.com/ritterhou/stinger/core/codec"
 	"github.com/ritterhou/stinger/core/network"
 	localConf "github.com/ritterhou/stinger/local/conf"
 	"github.com/ritterhou/stinger/local/http"
@@ -46,6 +47,8 @@ func main() {
 	default:
 		log.Println("Unknown type ", v)
 	}
+
+	codec.SetKey(password)
 
 	http.CreatePacFile(localPort, global, domains)
 	go http.StartServer(pacPort)
