@@ -1,0 +1,4 @@
+# 服务器所监听的端口
+server_port: 26800
+# 密码
+password: 123456a

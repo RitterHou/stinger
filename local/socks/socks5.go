@@ -68,7 +68,7 @@ func AuthSocks5(conn network.Connection) error {
 	return nil
 }
 
-func ConnectRemote(conn network.Connection, remoteServer string) (network.Connection, error) {
+func ConnectRemote(conn network.Connection, remoteServer string, password string) (network.Connection, error) {
 	socksVersion, err := conn.ReadByte()
 	if err != nil {
 		log.Println(err)
@@ -136,6 +136,19 @@ func ConnectRemote(conn network.Connection, remoteServer string) (network.Connec
 		return network.Connection{}, errors.New("can't connect to remote server " + remoteServer)
 	}
 	serverConn := network.Connection{Conn: c}
+	// 发送密码进行验证
+	serverConn.WriteWithLength([]byte(password))
+	// 获取验证状态
+	authStatus, err := serverConn.ReadByte()
+	if err != nil {
+		log.Println(err)
+		return network.Connection{}, err
+	}
+	if authStatus != 0 {
+		serverConn.Close()
+		conn.Write([]byte{5, 4, 0, 1, 0, 0, 0, 0, 0, 0})
+		return network.Connection{}, errors.New("remote server auth failed " + targetAddr)
+	}
 	// 把最终目标的地址（域名或IP）发送到远程主机，由远程主机负责实现连接
 	serverConn.WriteWithLength([]byte(targetAddr))
 	// 获取远程主机的连接状态

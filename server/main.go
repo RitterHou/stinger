@@ -1,7 +1,9 @@
 package main
 
 import (
+	"flag"
 	"github.com/ritterhou/stinger/core/codec"
+	"github.com/ritterhou/stinger/core/common"
 	"github.com/ritterhou/stinger/core/network"
 	"log"
 	"net"
@@ -14,12 +16,37 @@ func init() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 }
 
-const localPort = 26800
+var (
+	confFile string
+	password string
+)
 
 func main() {
+	flag.StringVar(&confFile, "c", "stinger_server.yaml", "Server configuration file.")
+
+	path := common.GetAbsPath(confFile)
+	content := common.ReadFile(path)
+	conf := common.MarshalYaml(content)
+
+	serverPort := conf["server_port"].(int)
+
+	pwd := conf["password"]
+	switch v := pwd.(type) {
+	case int:
+		password = strconv.Itoa(v)
+	case string:
+		password = v
+	default:
+		log.Println("Unknown type ", v)
+	}
+
+	startProxyServer(serverPort)
+}
+
+func startProxyServer(proxyPort int) {
 	var l net.Listener
 	var err error
-	var host = "0.0.0.0:" + strconv.Itoa(localPort)
+	var host = "0.0.0.0:" + strconv.Itoa(proxyPort)
 
 	l, err = net.Listen("tcp", host)
 	if err != nil {
@@ -27,7 +54,7 @@ func main() {
 	}
 	defer l.Close()
 
-	log.Println("Server listening on " + host + " ...")
+	log.Println("Server listening on " + host)
 	for {
 		conn, err := l.Accept()
 		if err != nil {
@@ -42,6 +69,19 @@ func main() {
 }
 
 func handlerClient(localConn network.Connection) {
+	clientPwdBytes, err := localConn.ReadWithLength()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	clientPwd := string(clientPwdBytes)
+	if clientPwd != password {
+		log.Printf("client password %s not equals %s\n", clientPwd, password)
+		localConn.Write([]byte{1})
+		return
+	}
+	localConn.Write([]byte{0})
+
 	targetAddrBytes, err := localConn.ReadWithLength()
 	if err != nil {
 		log.Println(err)

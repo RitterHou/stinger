@@ -15,6 +15,7 @@ import (
 var (
 	confFile     string
 	remoteServer string
+	password     string
 )
 
 func init() {
@@ -35,6 +36,16 @@ func main() {
 
 	localPort := conf["local_port"].(int)
 	remoteServer = conf["server_address"].(string)
+
+	pwd := conf["password"]
+	switch v := pwd.(type) {
+	case int:
+		password = strconv.Itoa(v)
+	case string:
+		password = v
+	default:
+		log.Println("Unknown type ", v)
+	}
 
 	http.CreatePacFile(localPort, global, domains)
 	go http.StartServer(pacPort)
@@ -72,7 +83,7 @@ func handlerSocks5(conn network.Connection) {
 		log.Println(err)
 		return
 	}
-	remoteConn, err := socks.ConnectRemote(conn, remoteServer)
+	remoteConn, err := socks.ConnectRemote(conn, remoteServer, password)
 	if err != nil {
 		log.Println(err)
 		return

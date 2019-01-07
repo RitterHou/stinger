@@ -4,7 +4,7 @@ pac:
   port: 2600
   # 是否开启全局代理
   global: true
-  # 需要使用代理的域名，域名使用包含匹配
+  # 如果不使用全局代理，那么就设置需要使用代理的域名，域名使用包含匹配
   domains: [
     hourui.me,
     nosuchfield.com,
@@ -15,3 +15,5 @@ pac:
 local_port: 2680
 # 服务器的地址
 server_address: 127.0.0.1:26800
+# 密码
+password: 123456
