@@ -38,6 +38,8 @@ cd ./server
 build "server"
 
 cd ../local
+echo "Packaging static files to statik/statik.go"
+go generate
 build "local"
 
 end=`date +%s`

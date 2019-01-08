@@ -1,3 +1,6 @@
+//go:generate statik -src=./assets
+//go:generate go fmt statik/statik.go
+
 package main
 
 import (

@@ -1,10 +1,14 @@
-hash: 89dc7c9d34568bcfa712837b95da093a89a084c0b344c9d78bb1530c2b16e52e
-updated: 2019-01-08T18:42:53.898966+08:00
+hash: 3973b6f5c8850c219952d3461d683ba8f1a4eefef8001d60eb127860fc5fd64a
+updated: 2019-01-08T21:29:10.4982337+08:00
 imports:
 - name: github.com/gorilla/websocket
   version: 95ba29eb981bbb27d92e1f70bf8a1949452d926b
 - name: github.com/pkg/errors
   version: ba968bfe8b2f7e042a574c888954fccecfa385b4
+- name: github.com/rakyll/statik
+  version: 79258177a57a85a8ab2eca7ce0936aad80307f4e
+  subpackages:
+  - fs
 - name: gopkg.in/yaml.v2
   version: 51d6538a90f86fe93ac480b35f37b2be17fef232
 testImports: []

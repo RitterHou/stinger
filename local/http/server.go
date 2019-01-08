@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/ritterhou/stinger/core/common"
+	"github.com/ritterhou/stinger/local/resource"
 	"github.com/ritterhou/stinger/local/socks"
 	"io"
 	"log"
@@ -41,13 +42,8 @@ var upgrade = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-// 流量显示页面
-func traffic(w http.ResponseWriter, req *http.Request) {
-
-}
-
 // 流量跟踪数据
-func trafficData(w http.ResponseWriter, req *http.Request) {
+func traffic(w http.ResponseWriter, req *http.Request) {
 	conn, err := upgrade.Upgrade(w, req, nil)
 	if err != nil {
 		log.Println(err)
@@ -66,11 +62,22 @@ func trafficData(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+var indexHtml string
+
+func index(w http.ResponseWriter, req *http.Request) {
+	io.WriteString(w, indexHtml)
+}
+
 func StartServer(port int) {
 	go bandwidthTraffic()
 
-	pacConf := getPac()
+	indexHtml = resource.GetContent("/html/index.html")
+
+	// 首页
+	http.HandleFunc("/", index)
+
 	// PAC文件获取
+	pacConf := getPac()
 	http.HandleFunc("/pac", func(w http.ResponseWriter, req *http.Request) {
 		log.Printf("%s fetched PAC file\n", req.RemoteAddr)
 		w.Header().Set("Content-Type", "application/x-ns-proxy-autoconfig")
@@ -79,7 +86,6 @@ func StartServer(port int) {
 
 	// 获取流量以及网速信息
 	http.HandleFunc("/traffic", traffic)
-	http.HandleFunc("/traffic/data", trafficData)
 
 	log.Printf("HTTP Server working on http://0.0.0.0:%d\n", port)
 	err := http.ListenAndServe("0.0.0.0:"+strconv.Itoa(port), nil)
