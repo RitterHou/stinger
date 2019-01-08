@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/ritterhou/stinger/core/common"
-	"github.com/ritterhou/stinger/local/resource"
 	"github.com/ritterhou/stinger/local/socks"
-	"io"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
+	"io"
+	"github.com/ritterhou/stinger/local/resource"
+	"strconv"
 )
 
 var download, upload uint64
@@ -49,17 +49,31 @@ func traffic(w http.ResponseWriter, req *http.Request) {
 		log.Println(err)
 		return
 	}
-	for {
-		messageType, p, err := conn.ReadMessage()
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		if err := conn.WriteMessage(messageType, p); err != nil {
-			log.Println(err)
-			return
+
+	messageType, p, err := conn.ReadMessage()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	seperater := string(p)
+	log.Println("The seperater is", seperater)
+
+	ticker := time.NewTicker(1 * time.Second)
+	lastDownload := download
+	lastUpload := upload
+	for range ticker.C {
+		if lastDownload != download || lastUpload != upload {
+			lastDownload = download
+			lastUpload = upload
+			message := fmt.Sprintf("%s%s%s", common.ByteFormat(download), seperater, common.ByteFormat(upload))
+			if err := conn.WriteMessage(messageType, []byte(message)); err != nil {
+				log.Println(err)
+				conn.Close()
+				break
+			}
 		}
 	}
+	log.Println("Stop sending traffic to", conn.RemoteAddr())
 }
 
 var indexHtml string

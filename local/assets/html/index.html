@@ -8,6 +8,51 @@
     <title>Stinger</title>
 </head>
 <body>
-
+<table>
+    <tr>
+        <td>↓</td>
+        <td id="download">0KB/s</td>
+        <td>↑</td>
+        <td id="upload">0KB/s</td>
+    </tr>
+</table>
 </body>
+<script>
+    var seperater = ',';
+
+    if (!window.WebSocket) {
+        window.WebSocket = window.MozWebSocket;
+    }
+
+    var socket;
+    if (window.WebSocket) {
+        socket = new WebSocket('ws://' + window.location.host + '/traffic');
+        socket.onmessage = function (event) {
+            console.log('收到信息：' + event.data);
+            var data = event.data.split(seperater);
+            document.getElementById('download').innerHTML = data[0] + '/s';
+            document.getElementById('upload').innerHTML = data[1] + '/s';
+        };
+        socket.onopen = function (event) {
+            console.log('连接开启！');
+            send(seperater);
+        };
+        socket.onclose = function (event) {
+            console.log('连接关闭！');
+        };
+    } else {
+        alert('你的浏览器不支持 WebSocket！');
+    }
+
+    function send(message) {
+        if (!window.WebSocket) {
+            return;
+        }
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send(message);
+        } else {
+            alert('连接没有开启.');
+        }
+    }
+</script>
 </html>
