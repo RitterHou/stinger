@@ -4,3 +4,4 @@ import:
   version: v0.8.1
 - package: gopkg.in/yaml.v2
   version: v2.2.2
+- package: github.com/gorilla/websocket

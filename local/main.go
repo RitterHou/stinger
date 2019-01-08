@@ -51,8 +51,6 @@ func main() {
 	http.CreatePacFile(localPort, global, domains)
 	go http.StartServer(pacPort)
 
-	go socks.BandwidthTraffic()
-
 	startProxyServer(localPort)
 }
 

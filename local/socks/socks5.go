@@ -11,33 +11,10 @@ import (
 	"net"
 	"strconv"
 	"sync/atomic"
-	"time"
 )
 
-var totalDownload uint64
-var totalUpload uint64
-
-// 显示带宽以及流量
-func BandwidthTraffic() {
-	log.Printf("Moniting bandwidth traffic.")
-
-	ticker := time.NewTicker(1 * time.Second)
-	lastDownload := totalDownload
-	lastUpload := totalUpload
-	for range ticker.C {
-		t := time.Now()
-		now := t.Format("2006-01-02 15:04:05")
-
-		download := totalDownload - lastDownload
-		upload := totalUpload - lastUpload
-		if upload != 0 && download != 0 {
-			fmt.Printf("%s %s ↓ %s ↑", now, common.ByteFormat(download), common.ByteFormat(upload))
-			fmt.Printf("    (%s ↓ %s ↑)\n", common.ByteFormat(totalDownload), common.ByteFormat(totalUpload))
-		}
-		lastDownload = totalDownload
-		lastUpload = totalUpload
-	}
-}
+var TotalDownload uint64
+var TotalUpload uint64
 
 func AuthSocks5(conn network.Connection) error {
 	socksVersion, err := conn.ReadByte()
@@ -208,7 +185,7 @@ func HandlerSocks5Data(localConn network.Connection, remoteConn network.Connecti
 
 			buf = codec.Encrypt(buf)
 			// 记载本地上传的流量
-			atomic.AddUint64(&totalUpload, uint64(len(buf)))
+			atomic.AddUint64(&TotalUpload, uint64(len(buf)))
 			// local -> server
 			err = remoteConn.WriteWithLength(buf)
 			if err != nil {
@@ -229,7 +206,7 @@ func HandlerSocks5Data(localConn network.Connection, remoteConn network.Connecti
 				break
 			}
 			// 记载本地下载的流量
-			atomic.AddUint64(&totalDownload, uint64(len(buf)))
+			atomic.AddUint64(&TotalDownload, uint64(len(buf)))
 
 			buf = codec.Decrypt(buf)
 			// local -> 浏览器
