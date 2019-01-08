@@ -15,3 +15,4 @@
 *.log
 /target
 /vendor
+/local/statik/statik.go
