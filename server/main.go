@@ -89,10 +89,19 @@ func handlerClient(localConn network.Connection) {
 	clientPwd := string(clientPwdBytes)
 	if clientPwd != password {
 		log.Printf("client password %s not equals %s\n", clientPwd, password)
-		localConn.Write([]byte{1})
+		err = localConn.Write([]byte{1})
+		if err != nil {
+			localConn.Close()
+			log.Println(err)
+		}
 		return
 	}
-	localConn.Write([]byte{0}) // 验证成功
+	err = localConn.Write([]byte{0}) // 验证成功
+	if err != nil {
+		localConn.Close()
+		log.Println(err)
+		return
+	}
 
 	targetAddrBytes, err := localConn.ReadWithLength()
 	if err != nil {
@@ -105,11 +114,20 @@ func handlerClient(localConn network.Connection) {
 	c, err := net.Dial("tcp", targetAddr)
 	if err != nil {
 		log.Println("can't connect to target address", targetAddr)
-		localConn.Write([]byte{1}) // 远程主机连接失败
+		err = localConn.Write([]byte{1}) // 远程主机连接失败
+		if err != nil {
+			localConn.Close()
+			log.Println(err)
+		}
 		return
 	}
 
-	localConn.Write([]byte{0}) // 连接成功
+	err = localConn.Write([]byte{0}) // 连接成功
+	if err != nil {
+		localConn.Close()
+		log.Println(err)
+		return
+	}
 	remoteConn := network.Connection{Conn: c}
 
 	go func() {
@@ -123,7 +141,12 @@ func handlerClient(localConn network.Connection) {
 			}
 			buf = codec.Decrypt(buf)
 			// server -> remote
-			remoteConn.Write(buf)
+			err = remoteConn.Write(buf)
+			if err != nil {
+				log.Println(remoteConn.RemoteAddress() + " -> " + err.Error())
+				localConn.Close()
+				break
+			}
 		}
 	}()
 
@@ -138,7 +161,12 @@ func handlerClient(localConn network.Connection) {
 			}
 			buf = codec.Encrypt(buf)
 			// server -> local
-			localConn.WriteWithLength(buf)
+			err = localConn.WriteWithLength(buf)
+			if err != nil {
+				log.Println(localConn.RemoteAddress() + " -> " + err.Error())
+				remoteConn.Close()
+				break
+			}
 		}
 	}()
 }

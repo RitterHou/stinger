@@ -64,7 +64,11 @@ func AuthSocks5(conn network.Connection) error {
 		log.Fatal("Only support [NO AUTHENTICATION REQUIRED] auth way.")
 	}
 
-	conn.Write([]byte{5, 0})
+	err = conn.Write([]byte{5, 0})
+	if err != nil {
+		log.Println(err)
+		return err
+	}
 	return nil
 }
 
@@ -132,12 +136,20 @@ func ConnectRemote(conn network.Connection, remoteServer string, password string
 	// 尝试连接到远程主机
 	c, err := net.Dial("tcp", remoteServer)
 	if err != nil {
-		conn.Write([]byte{5, 3, 0, 1, 0, 0, 0, 0, 0, 0})
+		err = conn.Write([]byte{5, 3, 0, 1, 0, 0, 0, 0, 0, 0})
+		if err != nil {
+			log.Println(err)
+			return network.Connection{}, err
+		}
 		return network.Connection{}, errors.New("can't connect to remote server " + remoteServer)
 	}
 	serverConn := network.Connection{Conn: c}
 	// 发送密码进行验证
-	serverConn.WriteWithLength([]byte(password))
+	err = serverConn.WriteWithLength([]byte(password))
+	if err != nil {
+		log.Println(err)
+		return network.Connection{}, err
+	}
 	// 获取验证状态
 	authStatus, err := serverConn.ReadByte()
 	if err != nil {
@@ -146,11 +158,19 @@ func ConnectRemote(conn network.Connection, remoteServer string, password string
 	}
 	if authStatus != 0 {
 		serverConn.Close()
-		conn.Write([]byte{5, 4, 0, 1, 0, 0, 0, 0, 0, 0})
+		err = conn.Write([]byte{5, 4, 0, 1, 0, 0, 0, 0, 0, 0})
+		if err != nil {
+			log.Println(err)
+			return network.Connection{}, err
+		}
 		return network.Connection{}, errors.New("remote server auth failed " + targetAddr)
 	}
 	// 把最终目标的地址（域名或IP）发送到远程主机，由远程主机负责实现连接
-	serverConn.WriteWithLength([]byte(targetAddr))
+	err = serverConn.WriteWithLength([]byte(targetAddr))
+	if err != nil {
+		log.Println(err)
+		return network.Connection{}, err
+	}
 	// 获取远程主机的连接状态
 	connectStatus, err := serverConn.ReadByte()
 	if err != nil {
@@ -159,11 +179,19 @@ func ConnectRemote(conn network.Connection, remoteServer string, password string
 	}
 	if connectStatus != 0 {
 		serverConn.Close()
-		conn.Write([]byte{5, 4, 0, 1, 0, 0, 0, 0, 0, 0})
+		err = conn.Write([]byte{5, 4, 0, 1, 0, 0, 0, 0, 0, 0})
+		if err != nil {
+			log.Println(err)
+			return network.Connection{}, err
+		}
 		return network.Connection{}, errors.New("remote server connect target address failed " + targetAddr)
 	}
 	// 向客户端发送连接成功的消息
-	conn.Write([]byte{5, 0, 0, 1, 0, 0, 0, 0, 0, 0})
+	err = conn.Write([]byte{5, 0, 0, 1, 0, 0, 0, 0, 0, 0})
+	if err != nil {
+		log.Println(err)
+		return network.Connection{}, err
+	}
 	return serverConn, nil
 }
 
@@ -182,7 +210,12 @@ func HandlerSocks5Data(localConn network.Connection, remoteConn network.Connecti
 			// 记载本地上传的流量
 			atomic.AddUint64(&totalUpload, uint64(len(buf)))
 			// local -> server
-			remoteConn.WriteWithLength(buf)
+			err = remoteConn.WriteWithLength(buf)
+			if err != nil {
+				log.Println(remoteConn.RemoteAddress() + " -> " + err.Error())
+				localConn.Close()
+				break
+			}
 		}
 	}()
 
@@ -200,7 +233,12 @@ func HandlerSocks5Data(localConn network.Connection, remoteConn network.Connecti
 
 			buf = codec.Decrypt(buf)
 			// local -> 浏览器
-			localConn.Write(buf)
+			err = localConn.Write(buf)
+			if err != nil {
+				log.Println(localConn.RemoteAddress() + " -> " + err.Error())
+				remoteConn.Close()
+				break
+			}
 		}
 	}()
 }

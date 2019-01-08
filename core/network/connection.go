@@ -23,11 +23,14 @@ func (c Connection) Read(length uint32) ([]byte, error) {
 	return buf[:bufSize], nil
 }
 
-func (c Connection) Write(data []byte) {
+func (c Connection) Write(data []byte) error {
+	// 读操作默认不会超时
 	_, err := c.Conn.Write(data)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return err
 	}
+	return nil
 }
 
 func (c Connection) ReadWithLength() ([]byte, error) {
@@ -55,12 +58,19 @@ func (c Connection) ReadByte() (byte, error) {
 	return buf[0], nil
 }
 
-func (c Connection) WriteWithLength(source []byte) {
+func (c Connection) WriteWithLength(source []byte) error {
 	length := uint32(len(source))
 	lengthBuf := make([]byte, 4)
 	binary.BigEndian.PutUint32(lengthBuf, length)
-	c.Write(lengthBuf)
-	c.Write(source)
+	err := c.Write(lengthBuf)
+	if err != nil {
+		return err
+	}
+	err = c.Write(source)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c Connection) Close() {
