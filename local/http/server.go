@@ -10,6 +10,7 @@ import (
 func StartServer(port int) {
 	pacConf := getPac()
 	http.HandleFunc("/pac", func(w http.ResponseWriter, req *http.Request) {
+		log.Printf("%s fetched PAC file\n", req.RemoteAddr)
 		w.Header().Set("Content-Type", "application/x-ns-proxy-autoconfig")
 		io.WriteString(w, pacConf)
 	})

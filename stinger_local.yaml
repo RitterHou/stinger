@@ -17,3 +17,6 @@ local_port: 2680
 server_address: 127.0.0.1:26800
 # 密码
 password: 123456a
+# 日志文件
+log_file: stdout
+#log_file: stinger_local.log

@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"log"
 	"net"
 )
 
@@ -47,4 +48,22 @@ func GetIp() string {
 		}
 	}
 	return ipAddress
+}
+
+var outBoundIp string
+
+func GetOutboundIP() string {
+	if outBoundIp == "" {
+		conn, err := net.Dial("udp", "8.8.8.8:80")
+		if err != nil {
+			log.Println(err)
+			outBoundIp = GetIp()
+			return outBoundIp
+		}
+		defer conn.Close()
+
+		localAddr := conn.LocalAddr().(*net.UDPAddr)
+		outBoundIp = localAddr.IP.String()
+	}
+	return outBoundIp
 }
