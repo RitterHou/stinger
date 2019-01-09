@@ -75,7 +75,7 @@ func startProxyServer(proxyPort int) {
 			log.Println("Error accepting:", err)
 			continue
 		}
-		go handlerSocks5(network.Connection{Conn: conn})
+		go handlerSocks5(network.New(conn))
 	}
 }
 

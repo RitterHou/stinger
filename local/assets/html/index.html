@@ -26,7 +26,7 @@
 
     var socket;
     if (window.WebSocket) {
-        socket = new WebSocket('ws://' + window.location.host + '/traffic');
+        socket = new WebSocket('ws://' + window.location.host + '/ws');
         socket.onmessage = function (event) {
             console.log('收到信息：' + event.data);
             var data = event.data.split(separator);

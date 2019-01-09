@@ -63,8 +63,7 @@ func startProxyServer(proxyPort int) {
 		}
 
 		//log.Printf("Connection established %s -> %s \n", conn.RemoteAddr(), conn.LocalAddr())
-		c := network.Connection{Conn: conn}
-		go handlerClient(c)
+		go handlerClient(network.New(conn))
 	}
 }
 
@@ -99,7 +98,7 @@ func handlerClient(localConn network.Connection) {
 	targetAddr := string(targetAddrBytes)
 	//log.Println(targetAddr)
 
-	c, err := net.Dial("tcp", targetAddr)
+	remoteConn, err := network.Connect(targetAddr)
 	if err != nil {
 		log.Println("can't connect to target address", targetAddr)
 		err = localConn.Write([]byte{1}) // 远程主机连接失败
@@ -116,14 +115,13 @@ func handlerClient(localConn network.Connection) {
 		log.Println(err)
 		return
 	}
-	remoteConn := network.Connection{Conn: c}
 
 	go func() {
 		for {
 			// local -> server
 			buf, err := localConn.ReadWithLength()
 			if err != nil {
-				log.Println(localConn.RemoteAddress() + " -> " + err.Error())
+				//log.Println(localConn.RemoteAddress() + " -> " + err.Error())
 				remoteConn.Close()
 				break
 			}
@@ -131,7 +129,7 @@ func handlerClient(localConn network.Connection) {
 			// server -> remote
 			err = remoteConn.Write(buf)
 			if err != nil {
-				log.Println(remoteConn.RemoteAddress() + " -> " + err.Error())
+				//log.Println(remoteConn.RemoteAddress() + " -> " + err.Error())
 				localConn.Close()
 				break
 			}
@@ -143,7 +141,7 @@ func handlerClient(localConn network.Connection) {
 			// remote -> server
 			buf, err := remoteConn.Read(1024)
 			if err != nil {
-				log.Println(remoteConn.RemoteAddress() + " -> " + err.Error())
+				//log.Println(remoteConn.RemoteAddress() + " -> " + err.Error())
 				localConn.Close()
 				break
 			}
@@ -151,7 +149,7 @@ func handlerClient(localConn network.Connection) {
 			// server -> local
 			err = localConn.WriteWithLength(buf)
 			if err != nil {
-				log.Println(localConn.RemoteAddress() + " -> " + err.Error())
+				//log.Println(localConn.RemoteAddress() + " -> " + err.Error())
 				remoteConn.Close()
 				break
 			}

@@ -8,7 +8,6 @@ import (
 	"github.com/ritterhou/stinger/core/common"
 	"github.com/ritterhou/stinger/core/network"
 	"log"
-	"net"
 	"strconv"
 	"sync/atomic"
 )
@@ -110,8 +109,9 @@ func ConnectRemote(conn network.Connection, remoteServer string, password string
 	port := binary.BigEndian.Uint16(portBytes)
 	// 构建最终目标的地址
 	targetAddr := host + ":" + strconv.Itoa(int(port))
+
 	// 尝试连接到远程主机
-	c, err := net.Dial("tcp", remoteServer)
+	serverConn, err := network.Connect(remoteServer)
 	if err != nil {
 		err = conn.Write([]byte{5, 3, 0, 1, 0, 0, 0, 0, 0, 0})
 		if err != nil {
@@ -120,7 +120,6 @@ func ConnectRemote(conn network.Connection, remoteServer string, password string
 		}
 		return network.Connection{}, errors.New("can't connect to remote server " + remoteServer)
 	}
-	serverConn := network.Connection{Conn: c}
 	// 发送密码进行验证
 	err = serverConn.WriteWithLength([]byte(password))
 	if err != nil {
@@ -178,7 +177,7 @@ func HandlerSocks5Data(localConn network.Connection, remoteConn network.Connecti
 			// 浏览器 -> local
 			buf, err := localConn.Read(1024)
 			if err != nil {
-				log.Println(localConn.RemoteAddress() + " -> " + err.Error())
+				//log.Println(localConn.RemoteAddress() + " -> " + err.Error())
 				remoteConn.Close()
 				break
 			}
@@ -189,7 +188,7 @@ func HandlerSocks5Data(localConn network.Connection, remoteConn network.Connecti
 			// local -> server
 			err = remoteConn.WriteWithLength(buf)
 			if err != nil {
-				log.Println(remoteConn.RemoteAddress() + " -> " + err.Error())
+				//log.Println(remoteConn.RemoteAddress() + " -> " + err.Error())
 				localConn.Close()
 				break
 			}
@@ -201,7 +200,7 @@ func HandlerSocks5Data(localConn network.Connection, remoteConn network.Connecti
 			// server -> local
 			buf, err := remoteConn.ReadWithLength()
 			if err != nil {
-				log.Println(remoteConn.RemoteAddress() + " -> " + err.Error())
+				//log.Println(remoteConn.RemoteAddress() + " -> " + err.Error())
 				localConn.Close()
 				break
 			}
@@ -212,7 +211,7 @@ func HandlerSocks5Data(localConn network.Connection, remoteConn network.Connecti
 			// local -> 浏览器
 			err = localConn.Write(buf)
 			if err != nil {
-				log.Println(localConn.RemoteAddress() + " -> " + err.Error())
+				//log.Println(localConn.RemoteAddress() + " -> " + err.Error())
 				remoteConn.Close()
 				break
 			}

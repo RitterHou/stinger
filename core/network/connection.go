@@ -7,15 +7,36 @@ import (
 	"net"
 )
 
+// 对连接进行包装
 type Connection struct {
-	Conn net.Conn
+	conn   net.Conn
+	closed bool
+}
+
+// 使用已有连接创建自定义连接
+func New(conn net.Conn) Connection {
+	log.Printf("New connection %s -> %s\n", conn.LocalAddr(), conn.RemoteAddr())
+	return Connection{conn: conn, closed: false}
+}
+
+// 创建自定义连接并根据address进行远程连接
+func Connect(address string) (Connection, error) {
+	conn, err := net.Dial("tcp", address)
+	if err != nil {
+		log.Println(err)
+		return Connection{}, err
+	}
+	log.Printf("New connection %s -> %s\n", conn.LocalAddr(), conn.RemoteAddr())
+	return Connection{conn: conn, closed: false}, nil
 }
 
 func (c Connection) Read(length uint32) ([]byte, error) {
-	conn := c.Conn
+	if c.closed {
+		return nil, errors.New("Connection has been closed\n")
+	}
 
 	var buf = make([]byte, length)
-	var bufSize, err = conn.Read(buf)
+	var bufSize, err = c.conn.Read(buf)
 	if err != nil {
 		c.Close()
 		return nil, err
@@ -24,8 +45,12 @@ func (c Connection) Read(length uint32) ([]byte, error) {
 }
 
 func (c Connection) Write(data []byte) error {
+	if c.closed {
+		return errors.New("Connection has been closed\n")
+	}
+
 	// 读操作默认不会超时
-	_, err := c.Conn.Write(data)
+	_, err := c.conn.Write(data)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -74,13 +99,15 @@ func (c Connection) WriteWithLength(source []byte) error {
 }
 
 func (c Connection) Close() {
-	c.Conn.Close()
+	log.Printf("Close connection %s -> %s\n", c.LocalAddress(), c.RemoteAddress())
+	c.closed = true
+	c.conn.Close()
 }
 
 func (c Connection) RemoteAddress() string {
-	return c.Conn.RemoteAddr().String()
+	return c.conn.RemoteAddr().String()
 }
 
 func (c Connection) LocalAddress() string {
-	return c.Conn.LocalAddr().String()
+	return c.conn.LocalAddr().String()
 }
