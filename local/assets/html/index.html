@@ -18,7 +18,7 @@
 </table>
 </body>
 <script>
-    var seperater = ',';
+    var separator = ',';
 
     if (!window.WebSocket) {
         window.WebSocket = window.MozWebSocket;
@@ -29,13 +29,13 @@
         socket = new WebSocket('ws://' + window.location.host + '/traffic');
         socket.onmessage = function (event) {
             console.log('收到信息：' + event.data);
-            var data = event.data.split(seperater);
+            var data = event.data.split(separator);
             document.getElementById('download').innerHTML = data[0] + '/s';
             document.getElementById('upload').innerHTML = data[1] + '/s';
         };
         socket.onopen = function (event) {
             console.log('连接开启！');
-            send(seperater);
+            send(separator);
         };
         socket.onclose = function (event) {
             console.log('连接关闭！');

@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/ritterhou/stinger/core/common"
+	"github.com/ritterhou/stinger/local/resource"
 	"github.com/ritterhou/stinger/local/socks"
+	"io"
 	"log"
 	"net/http"
-	"time"
-	"io"
-	"github.com/ritterhou/stinger/local/resource"
 	"strconv"
+	"time"
 )
 
 var download, upload uint64
@@ -55,8 +55,8 @@ func traffic(w http.ResponseWriter, req *http.Request) {
 		log.Println(err)
 		return
 	}
-	seperater := string(p)
-	log.Println("The seperater is", seperater)
+	separator := string(p)
+	log.Println("The separator is", separator)
 
 	ticker := time.NewTicker(1 * time.Second)
 	lastDownload := download
@@ -65,7 +65,7 @@ func traffic(w http.ResponseWriter, req *http.Request) {
 		if lastDownload != download || lastUpload != upload {
 			lastDownload = download
 			lastUpload = upload
-			message := fmt.Sprintf("%s%s%s", common.ByteFormat(download), seperater, common.ByteFormat(upload))
+			message := fmt.Sprintf("%s%s%s", common.ByteFormat(download), separator, common.ByteFormat(upload))
 			if err := conn.WriteMessage(messageType, []byte(message)); err != nil {
 				log.Println(err)
 				conn.Close()
