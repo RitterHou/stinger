@@ -10,7 +10,6 @@ func LoadConf(filename string) {
 	path := common.GetAbsPath(filename)
 	content := common.ReadFile(path)
 	conf = common.MarshalYaml(content)
-	//log.Println("Load and marshal local configuration.")
 }
 
 func GetConf() map[interface{}]interface{} {

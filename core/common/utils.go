@@ -2,7 +2,7 @@ package common
 
 import (
 	"fmt"
-	"log"
+	"github.com/sirupsen/logrus"
 	"net"
 )
 
@@ -56,7 +56,7 @@ func GetOutboundIP() string {
 	if outBoundIp == "" {
 		conn, err := net.Dial("udp", "8.8.8.8:80")
 		if err != nil {
-			log.Println(err)
+			logrus.Info(err)
 			outBoundIp = GetIp()
 			return outBoundIp
 		}

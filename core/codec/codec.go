@@ -4,8 +4,8 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"github.com/sirupsen/logrus"
 	"io"
-	"log"
 )
 
 const key32Bytes = "23333333333333333333333333333333"
@@ -26,12 +26,12 @@ func SetKey(k string) {
 func Encrypt(source []byte) []byte {
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 	cipherText := make([]byte, aes.BlockSize+len(source))
 	iv := cipherText[:aes.BlockSize]
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 	cipher.NewCFBEncrypter(block, iv).XORKeyStream(cipherText[aes.BlockSize:], source)
 	return cipherText
@@ -40,10 +40,10 @@ func Encrypt(source []byte) []byte {
 func Decrypt(source []byte) []byte {
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 	if len(source) < aes.BlockSize {
-		log.Fatal("cipher text too short")
+		logrus.Fatal("cipher text too short")
 	}
 	iv := source[:aes.BlockSize]
 	source = source[aes.BlockSize:]

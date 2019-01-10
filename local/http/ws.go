@@ -5,7 +5,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/ritterhou/stinger/core/common"
 	"github.com/ritterhou/stinger/local/socks"
-	"log"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"time"
 )
@@ -14,7 +14,7 @@ var download, upload uint64
 
 // 计算带宽以及流量
 func bandwidthTraffic() {
-	log.Printf("Moniting bandwidth traffic.")
+	logrus.Info("Monitoring bandwidth traffic.")
 
 	ticker := time.NewTicker(1 * time.Second)
 	lastDownload := socks.TotalDownload
@@ -43,17 +43,17 @@ var upgrade = websocket.Upgrader{
 func ws(w http.ResponseWriter, req *http.Request) {
 	conn, err := upgrade.Upgrade(w, req, nil)
 	if err != nil {
-		log.Println(err)
+		logrus.Warn(err)
 		return
 	}
 
 	messageType, p, err := conn.ReadMessage()
 	if err != nil {
-		log.Println(err)
+		logrus.Warn(err)
 		return
 	}
 	separator := string(p)
-	log.Println("The separator is", separator)
+	logrus.Info("The separator is ", separator)
 
 	ticker := time.NewTicker(1 * time.Second)
 	lastDownload := download
@@ -64,11 +64,11 @@ func ws(w http.ResponseWriter, req *http.Request) {
 			lastUpload = upload
 			message := fmt.Sprintf("%s%s%s", common.ByteFormat(download), separator, common.ByteFormat(upload))
 			if err := conn.WriteMessage(messageType, []byte(message)); err != nil {
-				log.Println(err)
+				logrus.Warn(err)
 				conn.Close()
 				break
 			}
 		}
 	}
-	log.Println("Stop sending traffic to", conn.RemoteAddr())
+	logrus.Info("Stop sending traffic to ", conn.RemoteAddr())
 }

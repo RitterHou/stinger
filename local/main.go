@@ -11,7 +11,7 @@ import (
 	localConf "github.com/ritterhou/stinger/local/conf"
 	"github.com/ritterhou/stinger/local/http"
 	"github.com/ritterhou/stinger/local/socks"
-	"log"
+	"github.com/sirupsen/logrus"
 	"net"
 	"strconv"
 )
@@ -46,7 +46,7 @@ func main() {
 	case string:
 		password = v
 	default:
-		log.Println("Unknown type ", v)
+		logrus.Warn("Unknown type ", v)
 	}
 
 	codec.SetKey(password)
@@ -64,15 +64,15 @@ func startProxyServer(proxyPort int) {
 
 	l, err = net.Listen("tcp", host)
 	if err != nil {
-		log.Fatal("Error listening:", err)
+		logrus.Fatal("Error listening: ", err)
 	}
 	defer l.Close()
 
-	log.Println("Local ProxyServer working on " + host)
+	logrus.Info("Local ProxyServer working on " + host)
 	for {
 		conn, err := l.Accept()
 		if err != nil {
-			log.Println("Error accepting:", err)
+			logrus.Warn("Error accepting ", err)
 			continue
 		}
 		go handlerSocks5(network.New(conn))
@@ -82,15 +82,14 @@ func startProxyServer(proxyPort int) {
 func handlerSocks5(conn network.Connection) {
 	err := socks.AuthSocks5(conn)
 	if err != nil {
-		log.Println(err)
+		logrus.Warn(err)
 		return
 	}
 	remoteConn, err := socks.ConnectRemote(conn, remoteServer, password)
 	if err != nil {
-		log.Println(err)
+		logrus.Warn(err)
 		return
 	}
 
-	//log.Printf("Connect success %s -> %s, %s => %s\n", conn.RemoteAddress(), conn.LocalAddress(), remoteConn.LocalAddress(), remoteConn.RemoteAddress())
 	socks.HandlerSocks5Data(conn, remoteConn)
 }

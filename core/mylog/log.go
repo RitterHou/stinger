@@ -2,25 +2,39 @@ package mylog
 
 import (
 	"fmt"
-	"log"
+	"github.com/sirupsen/logrus"
+	"github.com/t-tomalak/logrus-easy-formatter"
 	"os"
+	"runtime"
 )
+
+var separator = "\n"
+
+func init() {
+	if runtime.GOOS == "windows" {
+		separator = "\r\n"
+	}
+}
 
 func InitLog(file string) {
 	fmt.Printf("### Log file is %s ###\n", file)
 
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	if file == "stdout" {
-		log.SetOutput(os.Stdout)
-		return
-	}
+	logrus.SetFormatter(&easy.Formatter{
+		TimestampFormat: "2006-01-02 15:04:05",
+		LogFormat:       "%time% - [%lvl%] %msg%" + separator,
+	})
+	logrus.SetLevel(logrus.InfoLevel)
 
-	if _, err := os.Stat(file); !os.IsNotExist(err) {
-		os.Remove(file)
+	if file == "stdout" {
+		logrus.SetOutput(os.Stdout)
+	} else {
+		if _, err := os.Stat(file); !os.IsNotExist(err) {
+			os.Remove(file)
+		}
+		logFile, err := os.OpenFile(file, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+		if err != nil {
+			fmt.Println("open log file failed", err)
+		}
+		logrus.SetOutput(logFile)
 	}
-	logFile, err := os.OpenFile(file, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-	if err != nil {
-		log.Fatalln("open log file failed", err)
-	}
-	log.SetOutput(logFile)
 }

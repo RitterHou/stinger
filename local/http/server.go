@@ -2,8 +2,8 @@ package http
 
 import (
 	"github.com/ritterhou/stinger/local/resource"
+	"github.com/sirupsen/logrus"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -23,7 +23,7 @@ func StartServer(port int) {
 	// PAC文件获取
 	pacConf := getPac()
 	http.HandleFunc("/pac", func(w http.ResponseWriter, req *http.Request) {
-		log.Printf("%s fetched PAC file\n", req.RemoteAddr)
+		logrus.Printf("%s fetched PAC file", req.RemoteAddr)
 		w.Header().Set("Content-Type", "application/x-ns-proxy-autoconfig")
 		io.WriteString(w, pacConf)
 	})
@@ -31,9 +31,9 @@ func StartServer(port int) {
 	// WebSocket
 	http.HandleFunc("/ws", ws)
 
-	log.Printf("HTTP Server working on http://0.0.0.0:%d\n", port)
+	logrus.Printf("HTTP Server working on http://0.0.0.0:%d", port)
 	err := http.ListenAndServe("0.0.0.0:"+strconv.Itoa(port), nil)
 	if err != nil {
-		log.Fatal("ListenAndServe: ", err)
+		logrus.Fatal("ListenAndServe: ", err)
 	}
 }

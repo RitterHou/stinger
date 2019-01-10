@@ -6,7 +6,7 @@ import (
 	"github.com/ritterhou/stinger/core/common"
 	"github.com/ritterhou/stinger/core/mylog"
 	"github.com/ritterhou/stinger/core/network"
-	"log"
+	"github.com/sirupsen/logrus"
 	"net"
 	"strconv"
 )
@@ -35,7 +35,7 @@ func main() {
 	case string:
 		password = v
 	default:
-		log.Println("Unknown type ", v)
+		logrus.Warn("Unknown type ", v)
 	}
 
 	codec.SetKey(password)
@@ -50,15 +50,15 @@ func startProxyServer(proxyPort int) {
 
 	l, err = net.Listen("tcp", host)
 	if err != nil {
-		log.Fatal("Error listening:", err)
+		logrus.Fatal("Error listening:", err)
 	}
 	defer l.Close()
 
-	log.Println("Server listening on " + host)
+	logrus.Info("Server listening on " + host)
 	for {
 		conn, err := l.Accept()
 		if err != nil {
-			log.Println("Error accepting:", err)
+			logrus.Warn("Error accepting:", err)
 			continue
 		}
 
@@ -70,29 +70,29 @@ func startProxyServer(proxyPort int) {
 func handlerClient(localConn network.Connection) {
 	clientPwdBytes, err := localConn.ReadWithLength()
 	if err != nil {
-		log.Println(err)
+		logrus.Warn(err)
 		return
 	}
 	clientPwd := string(clientPwdBytes)
 	if clientPwd != password {
-		log.Printf("client password %s not equals %s\n", clientPwd, password)
+		logrus.Printf("client password %s not equals %s", clientPwd, password)
 		err = localConn.Write([]byte{1})
 		if err != nil {
 			localConn.Close()
-			log.Println(err)
+			logrus.Warn(err)
 		}
 		return
 	}
 	err = localConn.Write([]byte{0}) // 验证成功
 	if err != nil {
 		localConn.Close()
-		log.Println(err)
+		logrus.Warn(err)
 		return
 	}
 
 	targetAddrBytes, err := localConn.ReadWithLength()
 	if err != nil {
-		log.Println(err)
+		logrus.Warn(err)
 		return
 	}
 	targetAddr := string(targetAddrBytes)
@@ -100,11 +100,11 @@ func handlerClient(localConn network.Connection) {
 
 	remoteConn, err := network.Connect(targetAddr)
 	if err != nil {
-		log.Println("can't connect to target address", targetAddr)
+		logrus.Info("can't connect to target address", targetAddr)
 		err = localConn.Write([]byte{1}) // 远程主机连接失败
 		if err != nil {
 			localConn.Close()
-			log.Println(err)
+			logrus.Warn(err)
 		}
 		return
 	}
@@ -112,7 +112,7 @@ func handlerClient(localConn network.Connection) {
 	err = localConn.Write([]byte{0}) // 连接成功
 	if err != nil {
 		localConn.Close()
-		log.Println(err)
+		logrus.Warn(err)
 		return
 	}
 

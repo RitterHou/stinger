@@ -2,7 +2,7 @@ package http
 
 import (
 	"github.com/ritterhou/stinger/core/common"
-	"log"
+	"github.com/sirupsen/logrus"
 	"strconv"
 	"strings"
 )
@@ -40,7 +40,7 @@ function FindProxyForURL(url, host) {
 		}
 		pacFile = strings.Replace(pacFile, "PROXY_DOMAINS", proxyDomains, 1)
 	}
-	log.Println("Create pac file success, pac file: \n" + pacFile)
+	logrus.Info("Create pac file success, pac file: \n" + pacFile)
 }
 
 // 获取PAC文件

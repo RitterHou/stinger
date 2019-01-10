@@ -3,8 +3,8 @@ package resource
 import (
 	"github.com/rakyll/statik/fs"
 	_ "github.com/ritterhou/stinger/local/statik"
+	"github.com/sirupsen/logrus"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"sync"
 )
@@ -19,7 +19,7 @@ func init() {
 	var err error
 	statikFS, err = fs.New()
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 	contents = make(map[string]string)
 }
@@ -35,12 +35,12 @@ func GetContent(filename string) string {
 		} else {
 			file, err := statikFS.Open(filename)
 			if err != nil {
-				log.Println(err)
+				logrus.Warn(err)
 				return ""
 			}
 			value, err := ioutil.ReadAll(file)
 			if err != nil {
-				log.Println(err)
+				logrus.Warn(err)
 				return ""
 			}
 			content = string(value)

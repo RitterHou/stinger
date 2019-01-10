@@ -1,8 +1,8 @@
 package common
 
 import (
+	"github.com/sirupsen/logrus"
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
 )
@@ -14,7 +14,7 @@ var (
 func init() {
 	dir, err := os.Getwd()
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 	root = dir
 }
@@ -27,7 +27,7 @@ func GetAbsPath(filename string) (absPath string) {
 func ReadFile(filePath string) []byte {
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 	return data
 }

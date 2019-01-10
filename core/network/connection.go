@@ -3,7 +3,7 @@ package network
 import (
 	"encoding/binary"
 	"errors"
-	"log"
+	"github.com/sirupsen/logrus"
 	"net"
 )
 
@@ -15,7 +15,7 @@ type Connection struct {
 
 // 使用已有连接创建自定义连接
 func New(conn net.Conn) Connection {
-	log.Printf("New connection %s -> %s\n", conn.LocalAddr(), conn.RemoteAddr())
+	logrus.Printf("New connection %s -> %s", conn.LocalAddr(), conn.RemoteAddr())
 	return Connection{conn: conn, closed: false}
 }
 
@@ -23,10 +23,10 @@ func New(conn net.Conn) Connection {
 func Connect(address string) (Connection, error) {
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
-		log.Println(err)
+		logrus.Warn(err)
 		return Connection{}, err
 	}
-	log.Printf("New connection %s -> %s\n", conn.LocalAddr(), conn.RemoteAddr())
+	logrus.Printf("New connection %s -> %s", conn.LocalAddr(), conn.RemoteAddr())
 	return Connection{conn: conn, closed: false}, nil
 }
 
@@ -52,7 +52,7 @@ func (c Connection) Write(data []byte) error {
 	// 读操作默认不会超时
 	_, err := c.conn.Write(data)
 	if err != nil {
-		log.Println(err)
+		logrus.Warn(err)
 		return err
 	}
 	return nil
@@ -99,7 +99,7 @@ func (c Connection) WriteWithLength(source []byte) error {
 }
 
 func (c Connection) Close() {
-	log.Printf("Close connection %s -> %s\n", c.LocalAddress(), c.RemoteAddress())
+	logrus.Printf("Close connection %s -> %s", c.LocalAddress(), c.RemoteAddress())
 	c.closed = true
 	c.conn.Close()
 }
