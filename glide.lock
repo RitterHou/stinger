@@ -1,14 +1,29 @@
-hash: 3973b6f5c8850c219952d3461d683ba8f1a4eefef8001d60eb127860fc5fd64a
-updated: 2019-01-08T21:29:10.4982337+08:00
+hash: 10050925b63a7e15c11b36a07427c46bffa6260e15b1daaffec2da0774235b57
+updated: 2019-01-10T16:23:31.420909+08:00
 imports:
 - name: github.com/gorilla/websocket
   version: 95ba29eb981bbb27d92e1f70bf8a1949452d926b
+- name: github.com/konsorten/go-windows-terminal-sequences
+  version: 5c8c8bd35d3832f5d134ae1e1e375b69a4d25242
 - name: github.com/pkg/errors
   version: ba968bfe8b2f7e042a574c888954fccecfa385b4
 - name: github.com/rakyll/statik
   version: 79258177a57a85a8ab2eca7ce0936aad80307f4e
   subpackages:
   - fs
+- name: github.com/sirupsen/logrus
+  version: eef6b768ab01a0598a0a6db97bad2a37d31df1d1
+- name: github.com/t-tomalak/logrus-easy-formatter
+  version: ca9ce6b071ebe774296872e9dff2009b87ddcbb0
+- name: golang.org/x/crypto
+  version: ff983b9c42bc9fbf91556e191cc8efb585c16908
+  subpackages:
+  - ssh/terminal
+- name: golang.org/x/sys
+  version: 48ac38b7c8cbedd50b1613c0fccacfc7d88dfcdf
+  subpackages:
+  - unix
+  - windows
 - name: gopkg.in/yaml.v2
   version: 51d6538a90f86fe93ac480b35f37b2be17fef232
 testImports: []

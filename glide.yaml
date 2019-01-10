@@ -6,3 +6,4 @@ import:
   version: v2.2.2
 - package: github.com/gorilla/websocket
 - package: github.com/rakyll/statik/fs
+- package: github.com/t-tomalak/logrus-easy-formatter
