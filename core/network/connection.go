@@ -38,6 +38,7 @@ func (c Connection) Read(length uint32) ([]byte, error) {
 	var buf = make([]byte, length)
 	var bufSize, err = c.conn.Read(buf)
 	if err != nil {
+		logrus.Warn(err)
 		c.Close()
 		return nil, err
 	}
