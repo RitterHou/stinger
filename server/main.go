@@ -24,7 +24,8 @@ func main() {
 	conf := common.MarshalYaml(content)
 
 	logFile := conf["log_file"].(string)
-	mylog.InitLog(logFile)
+	logLevel := conf["log_level"].(string)
+	mylog.InitLog(logFile, logLevel)
 
 	serverPort := conf["server_port"].(int)
 

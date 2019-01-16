@@ -16,14 +16,19 @@ func init() {
 	}
 }
 
-func InitLog(file string) {
+func InitLog(file string, level string) {
 	fmt.Printf("### Log file is %s ###\n", file)
 
 	logrus.SetFormatter(&easy.Formatter{
 		TimestampFormat: "2006-01-02 15:04:05",
 		LogFormat:       "%time% - [%lvl%] %msg%" + separator,
 	})
-	logrus.SetLevel(logrus.InfoLevel)
+	logLevel := logrus.InfoLevel
+	switch level {
+	case "WARN":
+		logLevel = logrus.WarnLevel
+	}
+	logrus.SetLevel(logLevel)
 
 	if file == "stdout" {
 		logrus.SetOutput(os.Stdout)

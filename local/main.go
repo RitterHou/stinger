@@ -29,7 +29,8 @@ func main() {
 	conf := localConf.GetConf()
 
 	logFile := conf["log_file"].(string)
-	mylog.InitLog(logFile)
+	logLevel := conf["log_level"].(string)
+	mylog.InitLog(logFile, logLevel)
 
 	pac := conf["pac"].(map[interface{}]interface{})
 	pacPort := pac["port"].(int)
