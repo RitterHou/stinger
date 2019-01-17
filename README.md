@@ -2,6 +2,7 @@
 _Across the Great Wall, we can reach every corner in the world._
 
 ![GitHub](https://img.shields.io/github/license/mashape/apistatus.svg)
+[![Build Status](https://travis-ci.org/RitterHou/stinger.svg?branch=master)](https://travis-ci.org/RitterHou/stinger)
 
 ### Usage
 
