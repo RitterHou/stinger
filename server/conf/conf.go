@@ -7,14 +7,10 @@ import (
 )
 
 type Conf struct {
-	HttpPort      int      `yaml:"http_port"`
-	Global        bool     `yaml:"global"`
-	Domains       []string `yaml:"domains"`
-	LocalPort     int      `yaml:"local_port"`
-	ServerAddress string   `yaml:"server_address"`
-	Password      string   `yaml:"password"`
-	LogFile       string   `yaml:"log_file"`
-	LogLevel      string   `yaml:"log_level"`
+	ServerPort int    `yaml:"server_port"`
+	Password   string `yaml:"password"`
+	LogFile    string `yaml:"log_file"`
+	LogLevel   string `yaml:"log_level"`
 }
 
 var conf Conf
@@ -28,14 +24,8 @@ func LoadConf(filename string) {
 		logrus.Fatal(err)
 	}
 
-	if conf.HttpPort == 0 {
-		conf.HttpPort = 2600
-	}
-	if conf.LocalPort == 0 {
-		conf.LocalPort = 2680
-	}
-	if conf.ServerAddress == "" {
-		conf.ServerAddress = "127.0.0.1:26800"
+	if conf.ServerPort == 0 {
+		conf.ServerPort = 26800
 	}
 	if conf.Password == "" {
 		conf.Password = "123456"

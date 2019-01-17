@@ -1,24 +1,21 @@
-# PAC(Proxy auto-config)的相关设置
-pac:
-  # PAC的端口设置，使用 http://host:port/pac 来自动配置代理域名
-  port: 2600
-  # 是否开启全局代理
-  global: true
-  # 如果不使用全局代理，那么就设置需要使用代理的域名，域名使用包含匹配
-  domains: [
-    hourui.me,
-    nosuchfield.com,
-    quora.com
-  ]
-
+# http服务器的端口号，PAC文件可以使用http://host:port/pac访问
+http_port: 2600
+# 是否启用全局代理
+global: true
+# 如果不使用全局代理，那么就设置需要使用代理的域名，域名使用包含匹配
+domains: [
+  hourui.me,
+  nosuchfield.com,
+  quora.com
+]
 # 本地socks5代理所监听的端口
 local_port: 2680
 # 服务器的地址
 server_address: 127.0.0.1:26800
 # 密码
 password: 123456a
-# 日志文件
+# 日志文件，stdout表示输出到标准输出
 log_file: stdout
 #log_file: stinger_local.log
 # 日志级别[INFO, WARN]
-log_level: WARN
+log_level: INFO

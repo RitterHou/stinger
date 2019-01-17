@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"github.com/ritterhou/stinger/core/codec"
-	"github.com/ritterhou/stinger/core/common"
 	"github.com/ritterhou/stinger/core/mylog"
 	"github.com/ritterhou/stinger/core/network"
+	serverConf "github.com/ritterhou/stinger/server/conf"
 	"github.com/sirupsen/logrus"
 	"net"
 	"strconv"
@@ -18,30 +18,13 @@ var (
 
 func main() {
 	flag.StringVar(&confFile, "c", "stinger_server.yaml", "Server configuration file.")
+	serverConf.LoadConf(confFile)
 
-	path := common.GetAbsPath(confFile)
-	content := common.ReadFile(path)
-	conf := common.MarshalYaml(content)
+	conf := serverConf.GetConf()
+	mylog.InitLog(conf.LogFile, conf.LogLevel)
 
-	logFile := conf["log_file"].(string)
-	logLevel := conf["log_level"].(string)
-	mylog.InitLog(logFile, logLevel)
-
-	serverPort := conf["server_port"].(int)
-
-	pwd := conf["password"]
-	switch v := pwd.(type) {
-	case int:
-		password = strconv.Itoa(v)
-	case string:
-		password = v
-	default:
-		logrus.Warn("Unknown type ", v)
-	}
-
-	codec.SetKey(password)
-
-	startProxyServer(serverPort)
+	codec.SetKey(conf.Password)
+	startProxyServer(conf.ServerPort)
 }
 
 func startProxyServer(proxyPort int) {
@@ -122,7 +105,7 @@ func handlerClient(localConn network.Connection) {
 			// local -> server
 			buf, err := localConn.ReadWithLength()
 			if err != nil {
-				logrus.Warn("local -> server " + localConn.RemoteAddress() + " -> " + err.Error())
+				logrus.Info("local -> server " + localConn.RemoteAddress() + " -> " + err.Error())
 				remoteConn.Close()
 				break
 			}
@@ -130,7 +113,7 @@ func handlerClient(localConn network.Connection) {
 			// server -> remote
 			err = remoteConn.Write(buf)
 			if err != nil {
-				logrus.Warn("server -> remote " + remoteConn.RemoteAddress() + " -> " + err.Error())
+				logrus.Info("server -> remote " + remoteConn.RemoteAddress() + " -> " + err.Error())
 				localConn.Close()
 				break
 			}
@@ -142,7 +125,7 @@ func handlerClient(localConn network.Connection) {
 			// remote -> server
 			buf, err := remoteConn.Read(1024)
 			if err != nil {
-				logrus.Warn("remote -> server " + remoteConn.RemoteAddress() + " -> " + err.Error())
+				logrus.Info("remote -> server " + remoteConn.RemoteAddress() + " -> " + err.Error())
 				localConn.Close()
 				break
 			}
@@ -150,7 +133,7 @@ func handlerClient(localConn network.Connection) {
 			// server -> local
 			err = localConn.WriteWithLength(buf)
 			if err != nil {
-				logrus.Warn("server -> local " + localConn.RemoteAddress() + " -> " + err.Error())
+				logrus.Info("server -> local " + localConn.RemoteAddress() + " -> " + err.Error())
 				remoteConn.Close()
 				break
 			}

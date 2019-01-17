@@ -24,36 +24,19 @@ var (
 
 func main() {
 	flag.StringVar(&confFile, "c", "stinger_local.yaml", "Local configuration file.")
-
 	localConf.LoadConf(confFile)
+
 	conf := localConf.GetConf()
 
-	logFile := conf["log_file"].(string)
-	logLevel := conf["log_level"].(string)
-	mylog.InitLog(logFile, logLevel)
+	mylog.InitLog(conf.LogFile, conf.LogLevel)
 
-	pac := conf["pac"].(map[interface{}]interface{})
-	pacPort := pac["port"].(int)
-	global := pac["global"].(bool)
-	domains := pac["domains"].([]interface{})
+	localPort := conf.LocalPort
+	remoteServer = conf.ServerAddress
 
-	localPort := conf["local_port"].(int)
-	remoteServer = conf["server_address"].(string)
+	codec.SetKey(conf.Password)
 
-	pwd := conf["password"]
-	switch v := pwd.(type) {
-	case int:
-		password = strconv.Itoa(v)
-	case string:
-		password = v
-	default:
-		logrus.Warn("Unknown type ", v)
-	}
-
-	codec.SetKey(password)
-
-	http.CreatePacFile(localPort, global, domains)
-	go http.StartServer(pacPort)
+	http.CreatePacFile(localPort, conf.Global, conf.Domains)
+	go http.StartServer(conf.HttpPort)
 
 	startProxyServer(localPort)
 }
