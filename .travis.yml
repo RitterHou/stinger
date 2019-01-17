@@ -1,0 +1,18 @@
+language: go
+go:
+- "1.10.3"
+
+notifications:
+  email: false
+
+before_install:
+- cd ../..
+- mv RitterHou ritterhou
+- cd ritterhou/stinger
+- curl https://glide.sh/get | sh
+- glide install
+
+script:
+- go get -d github.com/rakyll/statik
+- go install github.com/rakyll/statik
+- ./build.sh
