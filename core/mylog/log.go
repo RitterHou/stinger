@@ -2,27 +2,47 @@ package mylog
 
 import (
 	"fmt"
+	"github.com/ritterhou/stinger/core/common"
 	"github.com/sirupsen/logrus"
 	"github.com/t-tomalak/logrus-easy-formatter"
 	"os"
 	"runtime"
 )
 
-var separator = "\n"
+const evnFile = "env.txt"
+
+var (
+	separator = "\n"
+	env       = "production"
+)
 
 func init() {
 	if runtime.GOOS == "windows" {
 		separator = "\r\n"
 	}
+
+	path := common.GetAbsPath(evnFile)
+	if _, err := os.Stat(path); !os.IsNotExist(err) {
+		content := common.ReadFile(path)
+		env = string(content)
+	}
 }
 
 func InitLog(file string, level string) {
-	fmt.Printf("### Log file is %s ###\n", file)
+	fmt.Printf("### Log file is %s, env is %s ###\n", file, env)
 
-	logrus.SetFormatter(&easy.Formatter{
-		TimestampFormat: "2006-01-02 15:04:05",
-		LogFormat:       "%time% - [%lvl%] %msg%" + separator,
-	})
+	if env == "develop" {
+		logrus.SetFormatter(&logrus.TextFormatter{
+			ForceColors: false,
+		})
+		logrus.SetReportCaller(true)
+	} else {
+		logrus.SetFormatter(&easy.Formatter{
+			TimestampFormat: "2006-01-02 15:04:05",
+			LogFormat:       "%time% - [%lvl%] %msg%" + separator,
+		})
+	}
+
 	logLevel := logrus.InfoLevel
 	switch level {
 	case "WARN":
