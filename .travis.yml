@@ -16,3 +16,12 @@ script:
 - go get -d github.com/rakyll/statik
 - go install github.com/rakyll/statik
 - ./build.sh
+
+deploy:
+  provider: releases
+  api_key: ${GH_TOKEN}
+  file_glob: true
+  file: target/*
+  skip_cleanup: true
+  on:
+    tags: true
