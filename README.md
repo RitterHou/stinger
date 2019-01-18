@@ -1,9 +1,9 @@
 # Stinger
 _Across the Great Wall, we can reach every corner in the world._
 
-![GitHub](https://img.shields.io/github/license/mashape/apistatus.svg)
 [![Build Status](https://travis-ci.org/RitterHou/stinger.svg?branch=master)](https://travis-ci.org/RitterHou/stinger)
 ![Golang](https://img.shields.io/badge/golang-1.10.3-blue.svg)
+![GitHub](https://img.shields.io/badge/license-Apache%202.0-green.svg)
 
 ### Usage
 
