@@ -5,5 +5,5 @@ password: 123456a
 # 日志文件
 log_file: stdout
 #log_file: stinger_server.log
-# 日志级别[INFO, WARN]
-log_level: WARN
+# 日志级别[DEBUG, INFO, WARN]
+log_level: INFO

@@ -17,5 +17,5 @@ password: 123456a
 # 日志文件，stdout表示输出到标准输出
 log_file: stdout
 #log_file: stinger_local.log
-# 日志级别[INFO, WARN]
+# 日志级别[DEBUG, INFO, WARN]
 log_level: INFO

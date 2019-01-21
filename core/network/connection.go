@@ -15,7 +15,7 @@ type Connection struct {
 
 // 使用已有连接创建自定义连接
 func New(conn net.Conn) Connection {
-	logrus.Printf("New connection %s -> %s", conn.LocalAddr(), conn.RemoteAddr())
+	logrus.Debugf("New connection %s -> %s", conn.LocalAddr(), conn.RemoteAddr())
 	return Connection{conn: conn, closed: false}
 }
 
@@ -26,7 +26,7 @@ func Connect(address string) (Connection, error) {
 		logrus.Warn(err)
 		return Connection{}, err
 	}
-	logrus.Printf("New connection %s -> %s", conn.LocalAddr(), conn.RemoteAddr())
+	logrus.Debugf("New connection %s -> %s", conn.LocalAddr(), conn.RemoteAddr())
 	return Connection{conn: conn, closed: false}, nil
 }
 
@@ -99,7 +99,7 @@ func (c Connection) WriteWithLength(source []byte) error {
 }
 
 func (c Connection) Close() {
-	logrus.Printf("Close connection %s -> %s", c.LocalAddress(), c.RemoteAddress())
+	logrus.Debugf("Close connection %s -> %s", c.LocalAddress(), c.RemoteAddress())
 	c.closed = true
 	c.conn.Close()
 }

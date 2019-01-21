@@ -7,6 +7,7 @@ import (
 	"github.com/t-tomalak/logrus-easy-formatter"
 	"os"
 	"runtime"
+	"strings"
 )
 
 const evnFile = "env.txt"
@@ -44,7 +45,12 @@ func InitLog(file string, level string) {
 	}
 
 	logLevel := logrus.InfoLevel
+	level = strings.ToUpper(level)
 	switch level {
+	case "DEBUG":
+		logLevel = logrus.DebugLevel
+	case "INFO":
+		logLevel = logrus.InfoLevel
 	case "WARN":
 		logLevel = logrus.WarnLevel
 	}
