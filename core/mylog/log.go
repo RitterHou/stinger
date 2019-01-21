@@ -30,8 +30,6 @@ func init() {
 }
 
 func InitLog(file string, level string) {
-	fmt.Printf("### Log file is %s, env is %s ###\n", file, env)
-
 	if env == "develop" {
 		logrus.SetFormatter(&logrus.TextFormatter{
 			ForceColors: false,
@@ -68,4 +66,6 @@ func InitLog(file string, level string) {
 		}
 		logrus.SetOutput(logFile)
 	}
+
+	fmt.Printf("### Log file is [%s], log level is [%s], env is [%s] ###\n", file, logrus.GetLevel().String(), env)
 }

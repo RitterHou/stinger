@@ -69,11 +69,12 @@ func handlerSocks5(conn network.Connection) {
 		logrus.Warn(err)
 		return
 	}
+	logrus.Debugf("Socks5 auth success: %s", conn.RemoteAddress())
 	remoteConn, err := socks.ConnectRemote(conn, remoteServer, password)
 	if err != nil {
 		logrus.Warn(err)
 		return
 	}
-
+	logrus.Debugf("Socks5 remote connect success: %s", conn.RemoteAddress())
 	socks.HandlerSocks5Data(conn, remoteConn)
 }
