@@ -3,6 +3,7 @@ package network
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"github.com/sirupsen/logrus"
 	"net"
 )
@@ -37,6 +38,12 @@ func (c Connection) Read(length uint32) ([]byte, error) {
 
 	var buf = make([]byte, length)
 	var bufSize, err = c.conn.Read(buf)
+	// 连接被远程主机主动关闭
+	if bufSize == 0 {
+		e := fmt.Sprintf("conn closed by remote, %s -> %s", c.LocalAddress(), c.RemoteAddress())
+		logrus.Debug(e)
+		return nil, errors.New(e)
+	}
 	if err != nil {
 		c.Close()
 		return nil, err

@@ -177,7 +177,7 @@ func HandlerSocks5Data(localConn network.Connection, remoteConn network.Connecti
 			// 浏览器 -> local
 			buf, err := localConn.Read(1024)
 			if err != nil {
-				//log.Println(localConn.RemoteAddress() + " -> " + err.Error())
+				logrus.Debug(localConn.RemoteAddress() + " -> " + err.Error())
 				remoteConn.Close()
 				break
 			}
@@ -188,7 +188,7 @@ func HandlerSocks5Data(localConn network.Connection, remoteConn network.Connecti
 			// local -> server
 			err = remoteConn.WriteWithLength(buf)
 			if err != nil {
-				//log.Println(remoteConn.RemoteAddress() + " -> " + err.Error())
+				logrus.Debug(remoteConn.RemoteAddress() + " -> " + err.Error())
 				localConn.Close()
 				break
 			}
@@ -200,7 +200,7 @@ func HandlerSocks5Data(localConn network.Connection, remoteConn network.Connecti
 			// server -> local
 			buf, err := remoteConn.ReadWithLength()
 			if err != nil {
-				//log.Println(remoteConn.RemoteAddress() + " -> " + err.Error())
+				logrus.Debug(remoteConn.RemoteAddress() + " -> " + err.Error())
 				localConn.Close()
 				break
 			}
@@ -211,7 +211,7 @@ func HandlerSocks5Data(localConn network.Connection, remoteConn network.Connecti
 			// local -> 浏览器
 			err = localConn.Write(buf)
 			if err != nil {
-				//log.Println(localConn.RemoteAddress() + " -> " + err.Error())
+				logrus.Debug(localConn.RemoteAddress() + " -> " + err.Error())
 				remoteConn.Close()
 				break
 			}

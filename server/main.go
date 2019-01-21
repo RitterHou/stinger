@@ -105,7 +105,7 @@ func handlerClient(localConn network.Connection) {
 			// local -> server
 			buf, err := localConn.ReadWithLength()
 			if err != nil {
-				logrus.Info("local -> server " + localConn.RemoteAddress() + " -> " + err.Error())
+				logrus.Debug("local -> server " + localConn.RemoteAddress() + " -> " + err.Error())
 				remoteConn.Close()
 				break
 			}
@@ -113,7 +113,7 @@ func handlerClient(localConn network.Connection) {
 			// server -> remote
 			err = remoteConn.Write(buf)
 			if err != nil {
-				logrus.Info("server -> remote " + remoteConn.RemoteAddress() + " -> " + err.Error())
+				logrus.Debug("server -> remote " + remoteConn.RemoteAddress() + " -> " + err.Error())
 				localConn.Close()
 				break
 			}
@@ -125,7 +125,7 @@ func handlerClient(localConn network.Connection) {
 			// remote -> server
 			buf, err := remoteConn.Read(1024)
 			if err != nil {
-				logrus.Info("remote -> server " + remoteConn.RemoteAddress() + " -> " + err.Error())
+				logrus.Debug("remote -> server " + remoteConn.RemoteAddress() + " -> " + err.Error())
 				localConn.Close()
 				break
 			}
@@ -133,7 +133,7 @@ func handlerClient(localConn network.Connection) {
 			// server -> local
 			err = localConn.WriteWithLength(buf)
 			if err != nil {
-				logrus.Info("server -> local " + localConn.RemoteAddress() + " -> " + err.Error())
+				logrus.Debug("server -> local " + localConn.RemoteAddress() + " -> " + err.Error())
 				remoteConn.Close()
 				break
 			}
